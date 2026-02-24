@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Writing Assistant — Options</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <h1>AI Writing Assistant</h1>
+    <p class="subtitle">Configure your OpenAI settings</p>
+
+    <label for="apiUrl">API URL</label>
+    <input type="text" id="apiUrl" placeholder="https://api.openai.com/v1/chat/completions">
+    <p class="hint">Full endpoint URL including /chat/completions</p>
+
+    <label for="apiKey">API Key</label>
+    <input type="password" id="apiKey" placeholder="sk-…">
+
+    <label for="model">Model</label>
+    <input type="text" id="model" placeholder="gpt-5-mini">
+
+    <button id="save">Save</button>
+    <div id="status" class="status"></div>
+  </div>
+  <script src="options.js"></script>
+</body>
+</html>
