@@ -22,13 +22,25 @@ async function handleStreamChat(port, prompt, history = [], fieldContent = "") {
       systemPrompt += `\n\nThe text field currently contains:\n"""\n${fieldContent}\n"""`;
     }
 
+    // Sanitize history — only allow valid roles with string content
+    const safeHistory = (history || [])
+      .filter(m => (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+      .map(m => ({ role: m.role, content: m.content }));
+
     const messages = [
       { role: "system", content: systemPrompt },
-      ...history,
+      ...safeHistory,
       { role: "user", content: prompt }
     ];
 
     const url = apiUrl || "https://api.openai.com/v1/chat/completions";
+
+    // Validate URL scheme
+    if (!url.startsWith("https://") && !url.startsWith("http://")) {
+      port.postMessage({ type: "error", text: "Invalid API URL. Must start with http:// or https://" });
+      return;
+    }
+
     const response = await fetch(url, {
       method: "POST",
       headers: {

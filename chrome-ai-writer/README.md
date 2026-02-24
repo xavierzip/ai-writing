@@ -5,6 +5,8 @@ A Chrome extension that injects a floating AI chat dialog next to any active tex
 ## Features
 
 - **Floating chat dialog** appears next to any text input, textarea, or contenteditable field
+- **Smart field detection** — skips password, username, email, and login fields
+- **Field context awareness** — reads existing field content so the AI can reference/improve it (capped at 4000 chars)
 - **Streaming responses** — tokens appear in real-time as they arrive
 - **Markdown rendering** — code blocks, bold, italic, lists, links
 - **Append / Replace** — insert AI-generated text into the active field
@@ -63,8 +65,17 @@ Any endpoint that implements the OpenAI Chat Completions API format with SSE str
 - Azure OpenAI
 - Local LLM servers (LM Studio, Ollama with OpenAI compat, vLLM, etc.)
 
+## Security
+
+- API key is stored in `chrome.storage.sync` and never exposed to page context
+- API calls are made from the background service worker, not the content script
+- Markdown links are restricted to `http://` and `https://` URLs only (no `javascript:`)
+- Chat history sent to the API is sanitized to valid roles and string content
+- API URL is validated on save and before each request
+- Password, username, email, and login fields are excluded from triggering the dialog
+
 ## Notes
 
 - After reloading the extension in `chrome://extensions`, **refresh open tabs** for changes to take effect
-- The API key is stored in `chrome.storage.sync` and never exposed to page context
-- API calls are made from the background service worker, not the content script
+- Field content over 4000 characters is excluded from context (with a warning) to limit token costs
+- Chat history is capped to the last 10 messages per conversation

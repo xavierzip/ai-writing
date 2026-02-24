@@ -16,6 +16,11 @@ saveBtn.addEventListener("click", () => {
   const apiKey = apiKeyInput.value.trim();
   const model = modelSelect.value;
 
+  if (apiUrl && !apiUrl.match(/^https?:\/\//)) {
+    showStatus("API URL must start with http:// or https://", true);
+    return;
+  }
+
   if (!apiKey) {
     showStatus("Please enter an API key.", true);
     return;

@@ -13,7 +13,15 @@
   function isTextField(el) {
     if (!el) return false;
     if (el.tagName === "TEXTAREA") return true;
-    if (el.tagName === "INPUT" && (el.type === "text" || el.type === "search" || el.type === "url" || el.type === "email" || !el.type)) return true;
+    if (el.tagName === "INPUT") {
+      // Skip login/auth fields
+      if (el.type === "password") return false;
+      const name = (el.name || el.id || el.autocomplete || "").toLowerCase();
+      if (/username|login|passwd|password|email|phone/.test(name)) return false;
+      if (el.autocomplete === "username" || el.autocomplete === "email" ||
+          el.autocomplete === "current-password" || el.autocomplete === "new-password") return false;
+      if (el.type === "text" || el.type === "search" || el.type === "url" || !el.type) return true;
+    }
     if (el.isContentEditable) return true;
     return false;
   }
@@ -48,9 +56,9 @@
     html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
     html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
 
-    // Links [text](url)
-    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g,
-      '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    // Links [text](url) — only allow http/https URLs
+    html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
 
     // Unordered list items
     html = html.replace(/^[*\-] (.+)$/gm, "<li>$1</li>");
