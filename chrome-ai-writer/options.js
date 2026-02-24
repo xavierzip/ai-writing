@@ -5,7 +5,7 @@ const saveBtn = document.getElementById("save");
 const status = document.getElementById("status");
 
 // Load saved settings
-chrome.storage.sync.get(["apiUrl", "apiKey", "model"], ({ apiUrl, apiKey, model }) => {
+chrome.storage.local.get(["apiUrl", "apiKey", "model"], ({ apiUrl, apiKey, model }) => {
   if (apiUrl) apiUrlInput.value = apiUrl;
   if (apiKey) apiKeyInput.value = apiKey;
   if (model) modelSelect.value = model;
@@ -26,7 +26,7 @@ saveBtn.addEventListener("click", () => {
     return;
   }
 
-  chrome.storage.sync.set({ apiUrl, apiKey, model }, () => {
+  chrome.storage.local.set({ apiUrl, apiKey, model }, () => {
     showStatus("Settings saved.");
   });
 });

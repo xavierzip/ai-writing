@@ -195,6 +195,12 @@
     header.appendChild(closeBtn);
     dialogEl.appendChild(header);
 
+    // Disclaimer
+    const disclaimer = document.createElement("div");
+    disclaimer.className = "aw-disclaimer";
+    disclaimer.textContent = "Field content is sent to your configured API.";
+    dialogEl.appendChild(disclaimer);
+
     // Messages area
     const msgs = document.createElement("div");
     msgs.className = "aw-messages";
@@ -475,6 +481,15 @@
         padding: 0 2px;
       }
       .aw-close:hover { opacity: 0.7; }
+
+      .aw-disclaimer {
+        padding: 4px 14px;
+        font-size: 11px;
+        color: #888;
+        background: #f9f9f9;
+        border-bottom: 1px solid #eee;
+        text-align: center;
+      }
 
       .aw-messages {
         flex: 1;

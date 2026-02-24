@@ -67,7 +67,7 @@ Any endpoint that implements the OpenAI Chat Completions API format with SSE str
 
 ## Security
 
-- API key is stored in `chrome.storage.sync` and never exposed to page context
+- API key is stored in `chrome.storage.local` and never exposed to page context
 - API calls are made from the background service worker, not the content script
 - Markdown links are restricted to `http://` and `https://` URLs only (no `javascript:`)
 - Chat history sent to the API is sanitized to valid roles and string content

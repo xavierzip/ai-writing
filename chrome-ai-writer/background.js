@@ -9,7 +9,7 @@ chrome.runtime.onConnect.addListener((port) => {
 
 async function handleStreamChat(port, prompt, history = [], fieldContent = "") {
   try {
-    const { apiUrl, apiKey, model } = await chrome.storage.sync.get(["apiUrl", "apiKey", "model"]);
+    const { apiUrl, apiKey, model } = await chrome.storage.local.get(["apiUrl", "apiKey", "model"]);
 
     if (!apiKey) {
       port.postMessage({ type: "error", text: "API key not configured. Please set it in the extension options." });
