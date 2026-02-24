@@ -3,11 +3,11 @@ chrome.runtime.onConnect.addListener((port) => {
 
   port.onMessage.addListener(async (message) => {
     if (message.type !== "chat") return;
-    await handleStreamChat(port, message.prompt, message.history);
+    await handleStreamChat(port, message.prompt, message.history, message.fieldContent);
   });
 });
 
-async function handleStreamChat(port, prompt, history = []) {
+async function handleStreamChat(port, prompt, history = [], fieldContent = "") {
   try {
     const { apiUrl, apiKey, model } = await chrome.storage.sync.get(["apiUrl", "apiKey", "model"]);
 
@@ -16,8 +16,14 @@ async function handleStreamChat(port, prompt, history = []) {
       return;
     }
 
+    let systemPrompt = "You are a writing assistant embedded in a text field. When asked to write, rewrite, or generate text, output ONLY the final text — no explanations, no preamble, no quotes around it. The user will insert your output directly into their document. If the user asks a question instead, answer it briefly.";
+
+    if (fieldContent.trim()) {
+      systemPrompt += `\n\nThe text field currently contains:\n"""\n${fieldContent}\n"""`;
+    }
+
     const messages = [
-      { role: "system", content: "You are a writing assistant embedded in a text field. When asked to write, rewrite, or generate text, output ONLY the final text — no explanations, no preamble, no quotes around it. The user will insert your output directly into their document. If the user asks a question instead, answer it briefly." },
+      { role: "system", content: systemPrompt },
       ...history,
       { role: "user", content: prompt }
     ];

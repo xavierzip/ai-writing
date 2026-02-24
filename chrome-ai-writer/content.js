@@ -281,10 +281,21 @@
         sendBtn.disabled = false;
       });
 
+      // Read current field content as context — skip entirely if too long
+      const MAX_FIELD_CHARS = 4000;
+      let fieldContent = field.isContentEditable
+        ? field.innerText
+        : field.value;
+      if (fieldContent && fieldContent.length > MAX_FIELD_CHARS) {
+        fieldContent = "";
+        addMessage("assistant", "Field content is too long (>4000 chars) and was excluded from context.", true);
+      }
+
       port.postMessage({
         type: "chat",
         prompt: text,
-        history: chatHistory.slice(0, -1)
+        history: chatHistory.slice(-10, -1), // keep last 10 messages
+        fieldContent: fieldContent || ""
       });
     }
 
