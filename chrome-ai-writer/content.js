@@ -18,6 +18,8 @@
     { label: "Explain simply", prompt: (text) => `Explain the following text so that a 4-year-old can understand:\n"""\n${text}\n"""` },
     { label: "Rephrase it", prompt: (text) => `Rephrase the following text:\n"""\n${text}\n"""` },
     { label: "Fix grammar", prompt: (text) => `Fix the grammar in the following text:\n"""\n${text}\n"""` },
+    { label: "To English", prompt: (text) => `Translate the following text to English. Only output the translation, nothing else:\n"""\n${text}\n"""` },
+    { label: "中文翻译", prompt: (text) => `将以下文本翻译成中文，只输出翻译结果:\n"""\n${text}\n"""` },
   ];
 
   // ── Helpers ──────────────────────────────────────────────
