@@ -491,28 +491,29 @@
     const btnGroup = document.createElement("div");
     btnGroup.className = "aw-btn-group";
 
-    // Always show Copy
     const copyBtn = document.createElement("button");
-    copyBtn.className = "aw-insert aw-copy-btn";
-    copyBtn.textContent = "Copy";
+    copyBtn.className = "aw-btn-copy";
+    copyBtn.textContent = "📑 Copy";
+    copyBtn.title = "Copy to clipboard";
     copyBtn.addEventListener("click", () => {
       navigator.clipboard.writeText(text).then(() => {
-        copyBtn.textContent = "Copied!";
-        setTimeout(() => { copyBtn.textContent = "Copy"; }, 1500);
+        copyBtn.textContent = "✅ Copied";
+        setTimeout(() => { copyBtn.textContent = "📑 Copy"; }, 1500);
       });
     });
     btnGroup.appendChild(copyBtn);
 
-    // Show Append/Replace only when there's an active text field
     if (field) {
       const appendBtn = document.createElement("button");
-      appendBtn.className = "aw-insert";
-      appendBtn.textContent = "Append";
+      appendBtn.className = "aw-btn-append";
+      appendBtn.textContent = "➕ Append";
+      appendBtn.title = "Insert after existing text";
       appendBtn.addEventListener("click", () => appendTextField(field, text));
 
       const replaceBtn = document.createElement("button");
-      replaceBtn.className = "aw-insert aw-replace";
-      replaceBtn.textContent = "Replace";
+      replaceBtn.className = "aw-btn-replace";
+      replaceBtn.textContent = "📝 Replace";
+      replaceBtn.title = "Replace current text";
       replaceBtn.addEventListener("click", () => {
         const current = field.isContentEditable ? field.innerText : field.value;
         showConfirmDialog("Replace all content in the field?", current, () => {
@@ -846,21 +847,40 @@
         gap: 6px;
         margin-top: 6px;
       }
-      .aw-insert {
-        padding: 3px 10px;
+      .aw-btn-copy, .aw-btn-append, .aw-btn-replace {
+        padding: 4px 12px;
         font-size: 12px;
         font-weight: 600;
-        background: #4f46e5;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .aw-btn-copy {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
         color: #fff;
         border: none;
-        border-radius: 5px;
-        cursor: pointer;
       }
-      .aw-insert:hover { background: #4338ca; }
-      .aw-replace {
-        background: #6b7280;
+      .aw-btn-copy:hover {
+        background: linear-gradient(135deg, #4338ca, #6d28d9);
       }
-      .aw-replace:hover { background: #4b5563; }
+      .aw-btn-append {
+        background: transparent;
+        color: #4f46e5;
+        border: 1.5px solid #4f46e5;
+      }
+      .aw-btn-append:hover {
+        background: #4f46e5;
+        color: #fff;
+      }
+      .aw-btn-replace {
+        background: transparent;
+        color: #ea580c;
+        border: 1.5px solid #ea580c;
+      }
+      .aw-btn-replace:hover {
+        background: #ea580c;
+        color: #fff;
+      }
       .aw-confirm-overlay {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
@@ -996,10 +1016,6 @@
         color: #fff;
       }
 
-      .aw-copy-btn {
-        background: #059669;
-      }
-      .aw-copy-btn:hover { background: #047857; }
     `;
   }
 })();
