@@ -499,7 +499,10 @@
       const replaceBtn = document.createElement("button");
       replaceBtn.className = "aw-insert aw-replace";
       replaceBtn.textContent = "Replace";
-      replaceBtn.addEventListener("click", () => replaceTextField(field, text));
+      replaceBtn.addEventListener("click", () => {
+        if (!confirm("Replace all content in the field?")) return;
+        replaceTextField(field, text);
+      });
 
       btnGroup.appendChild(appendBtn);
       btnGroup.appendChild(replaceBtn);
