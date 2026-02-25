@@ -149,6 +149,13 @@
     document.body.appendChild(hostEl);
     shadowRoot = hostEl.attachShadow({ mode: "open" });
 
+    // Prevent mouse events from reaching the host page.
+    // This stops popups/dropdowns from closing when clicking our UI
+    // (host pages often use document-level "click outside" listeners).
+    ["mousedown", "click", "pointerdown"].forEach((evt) => {
+      hostEl.addEventListener(evt, (e) => e.stopPropagation());
+    });
+
     const style = document.createElement("style");
     style.textContent = getShadowStyles();
     shadowRoot.appendChild(style);
@@ -377,6 +384,12 @@
 
     dialogEl.style.left = `${left}px`;
     dialogEl.style.top = `${top}px`;
+
+    // Prevent keyboard events from leaking to the host page
+    // (e.g. GitHub uses "l" to open Labels, "e" to edit, etc.)
+    dialogEl.addEventListener("keydown", (e) => e.stopPropagation());
+    dialogEl.addEventListener("keyup", (e) => e.stopPropagation());
+    dialogEl.addEventListener("keypress", (e) => e.stopPropagation());
 
     // Dragging
     header.addEventListener("mousedown", startDrag);
