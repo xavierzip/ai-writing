@@ -323,6 +323,20 @@
     msgs.className = "aw-messages";
     dialogEl.appendChild(msgs);
 
+    // Show context snippet
+    const contextSource = field
+      ? (field.isContentEditable ? field.innerText : field.value)
+      : (autoSendPrompt ? null : selectedText); // auto-send already includes the text in the prompt
+    if (contextSource && contextSource.trim()) {
+      const truncated = contextSource.length > 120
+        ? contextSource.slice(0, 120) + "…"
+        : contextSource;
+      const ctxBubble = document.createElement("div");
+      ctxBubble.className = "aw-bubble aw-context";
+      ctxBubble.textContent = truncated;
+      msgs.appendChild(ctxBubble);
+    }
+
     // Input area
     const inputArea = document.createElement("div");
     inputArea.className = "aw-input-area";
@@ -500,8 +514,10 @@
       replaceBtn.className = "aw-insert aw-replace";
       replaceBtn.textContent = "Replace";
       replaceBtn.addEventListener("click", () => {
-        if (!confirm("Replace all content in the field?")) return;
-        replaceTextField(field, text);
+        const current = field.isContentEditable ? field.innerText : field.value;
+        showConfirmDialog("Replace all content in the field?", current, () => {
+          replaceTextField(field, text);
+        });
       });
 
       btnGroup.appendChild(appendBtn);
@@ -509,6 +525,54 @@
     }
 
     bubble.appendChild(btnGroup);
+  }
+
+  function showConfirmDialog(message, fieldContent, onConfirm) {
+    const overlay = document.createElement("div");
+    overlay.className = "aw-confirm-overlay";
+
+    const box = document.createElement("div");
+    box.className = "aw-confirm-box";
+
+    const msg = document.createElement("div");
+    msg.className = "aw-confirm-msg";
+    msg.textContent = message;
+    box.appendChild(msg);
+
+    // Show a truncated preview of the current field content
+    if (fieldContent && fieldContent.trim()) {
+      const preview = document.createElement("div");
+      preview.className = "aw-confirm-preview";
+      const truncated = fieldContent.length > 80
+        ? fieldContent.slice(0, 80) + "…"
+        : fieldContent;
+      preview.textContent = `"${truncated}"`;
+      box.appendChild(preview);
+    }
+
+    const btns = document.createElement("div");
+    btns.className = "aw-confirm-btns";
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.className = "aw-confirm-cancel";
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.addEventListener("click", () => overlay.remove());
+
+    const okBtn = document.createElement("button");
+    okBtn.className = "aw-confirm-ok";
+    okBtn.textContent = "Replace";
+    okBtn.addEventListener("click", () => {
+      overlay.remove();
+      onConfirm();
+    });
+
+    btns.appendChild(cancelBtn);
+    btns.appendChild(okBtn);
+    box.appendChild(btns);
+    overlay.appendChild(box);
+    shadowRoot.appendChild(overlay);
+
+    okBtn.focus();
   }
 
   function closeDialog() {
@@ -718,6 +782,27 @@
         color: #1a1a1a;
         border-bottom-left-radius: 3px;
       }
+      .aw-context {
+        align-self: stretch;
+        max-width: 100%;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        color: #666;
+        font-size: 12px;
+        font-style: italic;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .aw-context::before {
+        content: "Context:";
+        display: block;
+        font-style: normal;
+        font-weight: 600;
+        font-size: 11px;
+        color: #999;
+        margin-bottom: 3px;
+      }
       .aw-error {
         background: #fef2f2;
         color: #dc2626;
@@ -776,6 +861,73 @@
         background: #6b7280;
       }
       .aw-replace:hover { background: #4b5563; }
+      .aw-confirm-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: auto;
+        z-index: 2;
+        animation: aw-fade-in 0.15s ease;
+      }
+      .aw-confirm-box {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px 24px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        max-width: 300px;
+        text-align: center;
+      }
+      .aw-confirm-msg {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1a1a1a;
+        margin-bottom: 16px;
+        line-height: 1.4;
+      }
+      .aw-confirm-preview {
+        font-size: 12px;
+        color: #666;
+        background: #f5f5f5;
+        border-radius: 6px;
+        padding: 8px 10px;
+        margin-bottom: 14px;
+        line-height: 1.4;
+        max-height: 60px;
+        overflow: hidden;
+        word-break: break-word;
+        font-style: italic;
+      }
+      .aw-confirm-btns {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+      }
+      .aw-confirm-cancel, .aw-confirm-ok {
+        padding: 7px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .aw-confirm-cancel {
+        background: #f0f0f0;
+        color: #333;
+      }
+      .aw-confirm-cancel:hover { background: #e0e0e0; }
+      .aw-confirm-ok {
+        background: #dc2626;
+        color: #fff;
+      }
+      .aw-confirm-ok:hover { background: #b91c1c; }
+      @keyframes aw-fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
 
       .aw-input-area {
         display: flex;
