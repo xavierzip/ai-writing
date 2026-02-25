@@ -149,10 +149,11 @@
     document.body.appendChild(hostEl);
     shadowRoot = hostEl.attachShadow({ mode: "open" });
 
-    // Prevent mouse events from reaching the host page.
-    // This stops popups/dropdowns from closing when clicking our UI
-    // (host pages often use document-level "click outside" listeners).
-    ["mousedown", "click", "pointerdown"].forEach((evt) => {
+    // Prevent events from reaching the host page:
+    // - mousedown/click/pointerdown: stops "click outside" listeners from closing popups
+    // - focusin/focusout: stops focus-trap libraries (e.g. Radix UI) from stealing
+    //   focus back when the user clicks our textarea
+    ["mousedown", "click", "pointerdown", "focusin", "focusout", "wheel"].forEach((evt) => {
       hostEl.addEventListener(evt, (e) => e.stopPropagation());
     });
 
@@ -387,9 +388,9 @@
 
     // Prevent keyboard events from leaking to the host page
     // (e.g. GitHub uses "l" to open Labels, "e" to edit, etc.)
-    dialogEl.addEventListener("keydown", (e) => e.stopPropagation());
-    dialogEl.addEventListener("keyup", (e) => e.stopPropagation());
-    dialogEl.addEventListener("keypress", (e) => e.stopPropagation());
+    ["keydown", "keyup", "keypress"].forEach((evt) => {
+      dialogEl.addEventListener(evt, (e) => e.stopPropagation());
+    });
 
     // Dragging
     header.addEventListener("mousedown", startDrag);
@@ -463,6 +464,15 @@
       });
     }
 
+    // Blocking pointerdown at the host level prevents automatic focus,
+    // so we explicitly blur the host field and focus our textarea.
+    input.addEventListener("mousedown", () => {
+      if (document.activeElement && document.activeElement !== document.body) {
+        document.activeElement.blur();
+      }
+      setTimeout(() => input.focus(), 0);
+    });
+
     sendBtn.addEventListener("click", () => send());
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -480,7 +490,11 @@
     if (autoSendPrompt) {
       send(autoSendPrompt);
     } else {
-      input.focus();
+      // Delay focus to overcome host page focus traps and pointerdown blocking
+      if (document.activeElement && document.activeElement !== document.body) {
+        document.activeElement.blur();
+      }
+      setTimeout(() => input.focus(), 50);
     }
   }
 
