@@ -1,4 +1,8 @@
 (() => {
+  // Prevent duplicate injection (e.g. after extension reload)
+  if (window.__aiWriterInjected) return;
+  window.__aiWriterInjected = true;
+
   let activeField = null;
   let hostEl = null;
   let shadowRoot = null;
@@ -296,7 +300,8 @@
   // ── Dialog ───────────────────────────────────────────────
 
   function showDialogWithAutoSend(prompt) {
-    // Open dialog in selection mode (no field), then auto-send the prompt
+    // Close any existing dialog first so auto-send can proceed
+    if (dialogEl) closeDialog();
     showDialog(null, prompt);
   }
 
@@ -418,6 +423,8 @@
         return;
       }
 
+      let streamDone = false;
+
       port.onMessage.addListener((msg) => {
         const msgs = shadowRoot.querySelector(".aw-messages");
         if (msg.type === "chunk") {
@@ -426,6 +433,7 @@
           bubble.innerHTML = renderMarkdown(fullText);
           msgs.scrollTop = msgs.scrollHeight;
         } else if (msg.type === "done") {
+          streamDone = true;
           chatHistory.push({ role: "assistant", content: fullText });
           bubble.innerHTML = renderMarkdown(fullText);
           addActionButtons(bubble, fullText, field);
@@ -433,6 +441,7 @@
           sendBtn.disabled = false;
           port.disconnect();
         } else if (msg.type === "error") {
+          streamDone = true;
           bubble.remove();
           addMessage("assistant", msg.text, true);
           sendBtn.disabled = false;
@@ -441,6 +450,11 @@
       });
 
       port.onDisconnect.addListener(() => {
+        if (!streamDone) {
+          bubble.remove();
+          const err = chrome.runtime.lastError;
+          addMessage("assistant", err?.message || "Connection lost. Please try again.", true);
+        }
         sendBtn.disabled = false;
       });
 

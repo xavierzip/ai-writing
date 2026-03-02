@@ -50,7 +50,8 @@ async function handleStreamChat(port, prompt, history = [], fieldContent = "") {
       body: JSON.stringify({
         model: model || "gpt-5-mini",
         messages,
-        stream: true
+        stream: true,
+        ...(url.includes("aliyuncs.com") && { enable_thinking: false })
       })
     });
 
